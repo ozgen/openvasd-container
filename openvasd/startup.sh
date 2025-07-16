@@ -25,7 +25,7 @@ while ! [ -S "$REDIS_SOCKET_LOCATION" ]; do
 done
 echo "[INFO] Redis-server is up and running!"
 
-#Configure PORT if needed---
+# Configure PORT if needed---
 # Allow dynamic listener port injection
 if [ -n "${OPENVASD_PORT:-}" ]; then
   echo "[INFO] Setting listener port to ${OPENVASD_PORT}..."

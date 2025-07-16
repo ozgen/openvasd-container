@@ -15,7 +15,7 @@ RUN apt update && \
     pip install greenbone-feed-sync==${FEEDSYNC_VERSION} --break-system-packages && \
     apt clean && rm -rf /var/lib/apt/lists/*
 
-# 👇 Add gvm user and group
+# Add gvm user and group
 RUN groupadd --system gvm && \
     useradd --system --create-home --gid gvm --shell /bin/bash gvm
 
