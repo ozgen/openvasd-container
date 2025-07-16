@@ -1,0 +1,27 @@
+version: '3.1'
+
+services:
+  feed-service:
+    image: created-feed-image
+    container_name: feed-service
+    restart: unless-stopped
+    volumes:
+      - gvm_plugins:/var/lib/openvas/plugins
+      - gvm_notus:/var/lib/notus
+      - gvm_log:/var/log/feedsync
+
+  openvas-service:
+    image: created-openvasd-image
+    container_name: openvas-service
+    privileged: true
+    network_mode: host
+    depends_on:
+      - feed-service
+    volumes:
+      - gvm_plugins:/var/lib/openvas/plugins
+      - gvm_notus:/var/lib/notus
+
+volumes:
+  gvm_plugins:
+  gvm_notus:
+  gvm_log:
