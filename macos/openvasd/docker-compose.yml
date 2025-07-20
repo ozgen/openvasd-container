@@ -1,0 +1,15 @@
+version: '3.1'
+services:
+  openvas-service_dynamic:
+    network_mode: host
+    image: created-image
+    privileged: true
+    environment:
+      - OPENVASD_PORT=3002
+    volumes:
+      - /opt/gvm/var/lib/openvas/plugins:/var/lib/openvas/plugins:ro
+      - /opt/gvm/var/lib/notus:/var/lib/notus:ro
+#      - ~/openvasd-certs/new/server.pem:/etc/openvasd/tls/server.pem
+#      - ~/openvasd-certs/new/server.rsa:/var/lib/openvasd/tls/server.rsa
+#      - ~/openvasd-certs/new/client:/etc/openvasd/tls/client
+#      - ~/openvasd-certs/ca/ca.pem:/etc/openvasd/tls/client/ca.pem

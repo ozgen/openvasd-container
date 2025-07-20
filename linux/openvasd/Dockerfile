@@ -18,7 +18,6 @@ COPY --from=registry.community.greenbone.net/community/gpg-data /var/lib/greenbo
 
 # ---- Configuration ----
 COPY config.toml /etc/openvasd/openvasd.toml
-COPY openvas.conf /etc/openvas/openvas.conf
 
 # ---- Startup ----
 COPY startup.sh /app/startup.sh

@@ -7,19 +7,35 @@ This repository includes Docker configurations to run Greenbone's OpenVASD scann
 ```
 
 .
-├── docker-compose.yml         # Optional root-level Compose file
 ├── LICENSE
-├── feed/                      # Feed sync container setup
-│   ├── Dockerfile
-│   ├── feedsync-cron
-│   ├── greenbone-feed-sync.toml
-│   └── startup.sh
-└── openvasd/                  # Scanner stack container setup
-├── config.toml
-├── docker-compose.yml
-├── Dockerfile
-├── openvas.conf
-└── startup.sh
+├── README.md
+├── linux/                     # Setup for Linux environment
+│   ├── docker-compose.yml     # Docker Compose for feed and OpenVAS scanner services
+│   ├── feed/                  # Feed sync container setup
+│   │   ├── Dockerfile
+│   │   ├── feedsync-cron
+│   │   ├── greenbone-feed-sync.toml
+│   │   └── startup.sh
+│   └── openvasd/              # Scanner stack container setup
+│       ├── config.toml
+│       ├── docker-compose.yml
+│       ├── Dockerfile
+│       ├── openvas.conf
+│       └── startup.sh
+└── macos/                     # Setup for macOS environment
+    ├── docker-compose.yml     # Docker Compose for feed and OpenVAS scanner services
+    ├── feed/                  # Feed sync container setup
+    │   ├── Dockerfile
+    │   ├── feedsync-cron
+    │   ├── greenbone-feed-sync.toml
+    │   └── startup.sh
+    └── openvasd/              # Scanner stack container setup
+        ├── config.toml
+        ├── docker-compose.yml
+        ├── Dockerfile
+        ├── openvas.conf
+        └── startup.sh
+
 
 ````
 
@@ -28,7 +44,7 @@ This repository includes Docker configurations to run Greenbone's OpenVASD scann
 ### 1. Build Feed Sync Image
 
 ```bash
-cd feed
+cd linux/feed
 docker build -t greenbone-feed-sync .
 ````
 
