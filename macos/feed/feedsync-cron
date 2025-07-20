@@ -1,0 +1,1 @@
+0 1 * * * root /app/startup.sh >> /var/log/feedsync.log 2>&1
