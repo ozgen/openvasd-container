@@ -4,7 +4,7 @@
 # Requires: curl, jq
 
 SENSOR="localhost:3001"
-TARGET="192.168.65.254"
+TARGET="172.22.0.3"
 PAYLOAD=$(jq -n \
   --arg host "$TARGET" \
   '{
