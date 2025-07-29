@@ -32,9 +32,9 @@ if [ -n "${OPENVASD_PORT:-}" ]; then
   sed -i "s/address = \".*\"/address = \"127.0.0.1:${OPENVASD_PORT}\"/" /etc/openvasd/openvasd.toml
 fi
 
-# Start OpenVASD
-echo "[INFO] Starting openvasd ..."
-openvasd \
+# Start OpenVASD as gvm
+echo "[INFO] Starting openvasd as gvm ..."
+sudo -u gvm openvasd \
   --config /etc/openvasd/openvasd.toml \
   --log-level=DEBUG &
 
