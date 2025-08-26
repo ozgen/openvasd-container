@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gsa-lite-config
+  namespace: gvm
+data:
+  # ----------- NGINX proxy target -----------
+  # Used by envsubst to render default.conf (proxy to backend)
+  # Change to your backend Service if different.
+  BACKEND_ORIGIN: "http://gvmd-lite.gvm.svc.cluster.local:8082"
+
+  # ----------- frontend runtime config (config.js) -----------
+  # If you serve the frontend from the same host as the backend, leave empty.
+  # Otherwise set e.g. "https://api.example.com"
+  BACKEND_HOST: ""
+
+  # Base paths the frontend uses when building API URLs
+  AUTH_BASE_PATH: "/auth"
+  API_BASE_PATH: "/api/v1"
+
+  # i18n
+  DEFAULT_LANGUAGE: "en"
+  # IMPORTANT: must be a valid JSON array string
+  SUPPORTED_LANGUAGES: '["en","de"]'
+
+  # Storage keys
+  TOKEN_STORAGE_KEY: "gsa-lite-access-token"
+  REFRESH_TOKEN_STORAGE_KEY: "gsa-lite-refresh-token"

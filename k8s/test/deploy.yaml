@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ubuntu-target
+  namespace: gvm
+  labels: { app: ubuntu-target }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: ubuntu-target }
+  template:
+    metadata:
+      labels: { app: ubuntu-target }
+    spec:
+      containers:
+        - name: ubuntu
+          image: ubuntu:22.04
+          command: ["/bin/bash","-lc"]
+          args:
+            - |
+              set -e
+              apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+                openssh-server apache2 vsftpd netcat-traditional iputils-ping
+              mkdir -p /var/run/sshd
+              sed -i 's/^#*PermitRootLogin .*/PermitRootLogin yes/' /etc/ssh/sshd_config
+              echo 'root:root' | chpasswd
+              service ssh start
+              service apache2 start
+              service vsftpd start
+              tail -f /dev/null
+          ports:
+            - { name: http, containerPort: 80 }
+            - { name: ssh,  containerPort: 22 }
+            - { name: ftp,  containerPort: 21 }
+          securityContext:
+            allowPrivilegeEscalation: false
+          resources:
+            requests: { cpu: "100m", memory: "256Mi" }
+            limits:   { cpu: "500m", memory: "512Mi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ubuntu-target
+  namespace: gvm
+spec:
+  selector: { app: ubuntu-target }
+  type: ClusterIP
+  ports:
+    - { name: http, port: 80, targetPort: http }
+    - { name: ssh,  port: 22, targetPort: ssh  }
+    - { name: ftp,  port: 21, targetPort: ftp  }

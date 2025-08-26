@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: feed-service
+  namespace: gvm
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: feed-service }
+  template:
+    metadata:
+      labels: { app: feed-service }
+    spec:
+      containers:
+        - name: feed
+          image: feed-img:prod
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: plugins
+              mountPath: /var/lib/openvas/plugins
+            - name: notus
+              mountPath: /var/lib/notus
+            - name: logs
+              mountPath: /var/log/feedsync
+          readinessProbe:
+            exec:
+              command: [ "sh","-c","test -f /var/lib/openvas/plugins/.feedsync_ready" ]
+            initialDelaySeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command: [ "sh","-c","test -f /var/lib/openvas/plugins/.feedsync_ready" ]
+            initialDelaySeconds: 60
+            periodSeconds: 60
+      volumes:
+        - name: plugins
+          persistentVolumeClaim: { claimName: gvm-plugins-pvc }
+        - name: notus
+          persistentVolumeClaim: { claimName: gvm-notus-pvc }
+        - name: logs
+          persistentVolumeClaim: { claimName: gvm-log-pvc }
