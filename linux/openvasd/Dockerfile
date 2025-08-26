@@ -13,25 +13,29 @@ RUN apt update && \
 # ---- Add gvm user ----
 RUN useradd -ms /bin/bash gvm && \
     echo "gvm ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-    echo "Defaults secure_path += \"/usr/local/sbin\"" >> /etc/sudoers && \
+    echo 'Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"' >> /etc/sudoers \
     echo "Defaults env_keep += \"LD_LIBRARY_PATH\"" >> /etc/sudoers
 
 # ---- Redis Configuration (optional override) ----
 COPY --from=registry.community.greenbone.net/community/redis-server /etc/redis/redis.conf /etc/redis/redis.conf
+
+RUN chmod 0755 /etc/redis && chmod 0644 /etc/redis/redis.conf
 
 # ---- GPG Keyring ----
 COPY --from=registry.community.greenbone.net/community/gpg-data /var/lib/greenbone/gpg /var/lib/greenbone/gpg
 
 # ---- Configuration ----
 COPY config.toml /etc/openvasd/openvasd.toml
+RUN chmod 0755 /etc/openvasd && chmod 0644 /etc/openvasd/openvasd.toml || true
 
 # ---- Startup ----
 COPY startup.sh /app/startup.sh
 RUN chmod +x /app/startup.sh
 
 # ---- Set permissions ----
-RUN mkdir -p /var/lib/openvas /run/redis /var/log && \
-    chown -R gvm:gvm /var/lib/openvas /var/log /run/redis /var/lib/greenbone
+RUN mkdir -p /var/lib/openvas /var/log /run/redis /var/lib/redis && \
+    chown -R redis:redis /run/redis /var/lib/redis && \
+    chown -R root:root /etc/redis/redis.conf
 
 # Default to root for startup, or change to `gvm` if needed
 ENTRYPOINT ["/app/startup.sh"]

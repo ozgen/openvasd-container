@@ -29,7 +29,7 @@ echo "[INFO] Redis-server is up and running!"
 # Allow dynamic listener port injection
 if [ -n "${OPENVASD_PORT:-}" ]; then
   echo "[INFO] Setting listener port to ${OPENVASD_PORT}..."
-  sed -i "s/address = \".*\"/address = \"127.0.0.1:${OPENVASD_PORT}\"/" /etc/openvasd/openvasd.toml
+  sed -i "s/address = \".*\"/address = \"0.0.0.0:${OPENVASD_PORT}\"/" /etc/openvasd/openvasd.toml
 fi
 
 # Start OpenVASD as gvm

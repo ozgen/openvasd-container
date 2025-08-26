@@ -13,17 +13,19 @@ RUN apt update && \
 # ---- Add gvm user ----
 RUN useradd -ms /bin/bash gvm && \
     echo "gvm ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-    echo "Defaults secure_path += \"/usr/local/sbin\"" >> /etc/sudoers && \
+    echo 'Defaults secure_path="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"' >> /etc/sudoers  &&\
     echo "Defaults env_keep += \"LD_LIBRARY_PATH\"" >> /etc/sudoers
 
 # ---- Redis Configuration (optional override) ----
 COPY --from=registry.community.greenbone.net/community/redis-server /etc/redis/redis.conf /etc/redis/redis.conf
+RUN chmod 0755 /etc/redis && chmod 0644 /etc/redis/redis.conf
 
-# ---- GPG Keyring ----
+# Configs
 COPY --from=registry.community.greenbone.net/community/gpg-data /var/lib/greenbone/gpg /var/lib/greenbone/gpg
 
-# ---- Configuration ----
+# OpenVASD config
 COPY config.toml /etc/openvasd/openvasd.toml
+RUN chmod 0755 /etc/openvasd && chmod 0644 /etc/openvasd/openvasd.toml || true
 
 # ---- Startup ----
 COPY startup.sh /app/startup.sh

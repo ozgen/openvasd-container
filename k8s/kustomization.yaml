@@ -1,0 +1,19 @@
+# overlays/gvm/kustomization.yaml
+namespace: gvm
+resources:
+  - postgres/sa.yaml
+  - postgres/secret.yaml
+  - postgres/service.yaml
+  - postgres/netpol.yaml
+  - postgres/statefulset.yaml
+  - scan/pvc.yaml
+  - scan/sa.yaml
+  - scan/configmap.yaml
+  - scan/deployment_feed.yaml
+  - scan/deployment_openvasd.yaml
+  - scan/svc.yaml
+  - gvmd-lite/deployment.yaml
+  - gvmd-lite/svc.yaml
+  - gsa-lite/configmap.yaml
+  - gsa-lite/deployment.yaml
+  - gsa-lite/svc.yaml

@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: my-postgres-postgresql
+  namespace: gvm
+  labels:
+    app.kubernetes.io/instance: my-postgres
+    app.kubernetes.io/name: postgresql
+automountServiceAccountToken: false

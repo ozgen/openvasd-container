@@ -1,0 +1,97 @@
+version: '3.1'
+
+services:
+  feed-service:
+    image: feed-img:v1
+    platform: linux/amd64
+    container_name: feed-service
+    restart: unless-stopped
+    volumes:
+      - gvm_plugins:/var/lib/openvas/plugins
+      - gvm_notus:/var/lib/notus
+      - gvm_log:/var/log/feedsync
+    healthcheck:
+      test: [ "CMD-SHELL", "test -f /var/lib/openvas/plugins/.feedsync_ready" ]
+      interval: 30s
+      timeout: 5s
+      retries: 10
+
+  openvas-service:
+    image: scanner-img:v1
+    platform: linux/amd64
+    container_name: openvas-service
+    privileged: true
+    cap_add:
+      - NET_ADMIN    # Allows OpenVAS to perform network-related tasks.
+      - NET_RAW      # Allows OpenVAS to use raw sockets, essential for scanning.
+#    network_mode: host
+    depends_on:
+      feed-service:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    volumes:
+      - gvm_plugins:/var/lib/openvas/plugins
+      - gvm_notus:/var/lib/notus
+  postgres:
+    image: postgres:14
+    platform: linux/amd64
+    container_name: postgres
+    environment:
+      POSTGRES_USER: gvm
+      POSTGRES_PASSWORD: gvm
+      POSTGRES_DB: gvmd-lite-service
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "35432:5432"  # optional: expose to host
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U gvm -d gvmd-lite-service" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  gvmd-lite:
+    image: gvmd-lite:prod
+    platform: linux/amd64
+    container_name: gvmd-lite
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_USER: gvm
+      DB_PASSWORD: gvm
+      DB_NAME: gvmd-lite-service
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      SERVER_PORT: "8082"
+      LOG_LEVEL: "info"
+    ports:
+      - "8082:8082"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8082/api/public/documentation/index.html || exit 1" ]
+      interval: 10s
+      timeout: 3s
+      retries: 30
+    volumes:
+    - gvm_plugins:/var/lib/openvas/plugins
+  gsa-lite:
+    image: gsa-lite:prod
+    container_name: gsa-lite
+    depends_on:
+      gvmd-lite:
+        condition: service_healthy
+    ports:
+      - "8081:80"
+    # Keep runtime config minimal; we proxy /auth and /api in nginx,
+    # so leaving BACKEND_HOST empty makes your app use relative URLs.
+    environment:
+#      BACKEND_HOST: "http://localhost:8080"
+      AUTH_BASE_PATH: "/auth"
+      API_BASE_PATH: "/api/v1"
+
+volumes:
+  gvm_plugins:
+  gvm_notus:
+  gvm_log:
+  pgdata:
