@@ -13,6 +13,32 @@ spec:
       labels:
         app: feed-service
     spec:
+      initContainers:
+        - name: prep-volumes
+          image: "busybox:1.36"
+          securityContext:
+            runAsUser: 0
+          command:
+            - sh
+            - -c
+            - |
+              set -eux
+              # Notus
+              mkdir -p /var/lib/notus/products
+              chmod 0775 /var/lib/notus /var/lib/notus/products
+              # OpenVAS plugins
+              mkdir -p /var/lib/openvas/plugins
+              chmod 0775 /var/lib/openvas /var/lib/openvas/plugins
+              # Logs
+              mkdir -p /var/log/feedsync
+              chmod 0775 /var/log/feedsync
+          volumeMounts:
+            - name: plugins
+              mountPath: /var/lib/openvas/plugins
+            - name: notus
+              mountPath: /var/lib/notus
+            - name: logs
+              mountPath: /var/log/feedsync
       containers:
         - name: feed
           image: feed-img:prod
