@@ -4,7 +4,8 @@ metadata:
   name: openvas-service
   namespace: gvm
 spec:
-  selector: { app: openvas-service }
+  selector:
+    app: openvas-service
   ports:
     - name: scanner
       port: 3001

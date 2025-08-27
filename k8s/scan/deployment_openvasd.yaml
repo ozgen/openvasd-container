@@ -6,13 +6,15 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels: { app: openvas-service }
+    matchLabels:
+      app: openvas-service
   template:
     metadata:
-      labels: { app: openvas-service }
+      labels:
+        app: openvas-service
     spec:
       serviceAccountName: openvas
-      # --- Init: stage openvas (conditional) + stage nmap (copy) ---
+      # --- Init: stage openvas + stage nmap (copy) ---
       initContainers:
         - name: stage-tools-if-needed
           image: scanner-img:v1
@@ -76,9 +78,12 @@ spec:
               stage_openvas
               stage_nmap
           volumeMounts:
-            - { name: tools,              mountPath: /tools }
-            - { name: usr-local-sbin-vol, mountPath: /work-usr-local-sbin }
-            - { name: nmap-file,          mountPath: /nmap-vol }
+            - name: tools
+              mountPath: /tools
+            - name: usr-local-sbin-vol
+              mountPath: /work-usr-local-sbin
+            - name: nmap-file
+              mountPath: /nmap-vol
 
       # Scans originate from node network
       hostNetwork: true
@@ -88,7 +93,8 @@ spec:
         - name: openvas
           image: scanner-img:v1
           ports:
-            - { containerPort: 3001, name: scanner }
+            - containerPort: 3001
+              name: scanner
           securityContext:
             runAsUser: 0
             runAsGroup: 0
@@ -99,28 +105,42 @@ spec:
             - name: PATH
               value: "/tools:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
           volumeMounts:
-            - { name: plugins,            mountPath: /var/lib/openvas/plugins }
-            - { name: notus,              mountPath: /var/lib/notus }
-            - { name: varlog,             mountPath: /var/log }
-            - { name: redis-conf,         mountPath: /etc/redis/redis.conf, subPath: redis.conf, readOnly: true }
-            - { name: run-redis,          mountPath: /run/redis }
-            - { name: run-ospd,           mountPath: /var/run/ospd }
-            - { name: tools,              mountPath: /tools }
-            - { name: usr-local-sbin-vol, mountPath: /usr/local/sbin }   # openvas symlink 
-            - { name: nmap-file,          mountPath: /usr/bin/nmap, subPath: nmap }
-
+            - name: plugins
+              mountPath: /var/lib/openvas/plugins
+            - name: notus
+              mountPath: /var/lib/notus
+            - name: varlog
+              mountPath: /var/log
+            - name: redis-conf
+              mountPath: /etc/redis/redis.conf
+              subPath: redis.conf
+              readOnly: true
+            - name: run-redis
+              mountPath: /run/redis
+            - name: run-ospd
+              mountPath: /var/run/ospd
+            - name: tools
+              mountPath: /tools
+            - name: usr-local-sbin-vol
+              mountPath: /usr/local/sbin   # openvas symlink
+            - name: nmap-file
+              mountPath: /usr/bin/nmap
+              subPath: nmap
       volumes:
         - name: plugins
-          persistentVolumeClaim: { claimName: gvm-plugins-pvc }
+          persistentVolumeClaim:
+            claimName: gvm-plugins-pvc
         - name: notus
-          persistentVolumeClaim: { claimName: gvm-notus-pvc }
+          persistentVolumeClaim:
+            claimName: gvm-notus-pvc
         - name: varlog
           emptyDir: { }
         - name: redis-conf
           configMap:
             name: openvas-redis-config
             items:
-              - { key: redis.conf, path: redis.conf }
+              - key: redis.conf
+                path: redis.conf
         - name: run-redis
           emptyDir: { }
         - name: run-ospd

@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   feed-service:
-    image: feed-img:v1
+    image: feed-img:prod
     platform: linux/amd64
     container_name: feed-service
     restart: unless-stopped
