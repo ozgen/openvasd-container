@@ -17,6 +17,9 @@ spec:
         - name: feed
           image: feed-img:prod
           imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
           env:
             - name: TZ
               value: "Europe/Berlin"
