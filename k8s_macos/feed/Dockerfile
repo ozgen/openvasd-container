@@ -2,37 +2,37 @@ FROM debian:bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV FEEDSYNC_VERSION=25.1.0
+# Adjust if you prefer a different zone
+ENV TZ=Europe/Bratislava
 
-# Install deps + util-linux (provides runuser) + gosu (nicer than su)
+# Install cron + deps and greenbone-feed-sync (Python package)
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         ca-certificates curl gnupg python3 python3-pip \
-        cron rsync util-linux gosu && \
+        cron rsync util-linux tzdata && \
     pip install "greenbone-feed-sync==${FEEDSYNC_VERSION}" --break-system-packages && \
     rm -rf /var/lib/apt/lists/*
 
-# Add gvm user and group
+# Optional: keep the gvm user present (we DO NOT switch to it at runtime)
 RUN groupadd --system gvm && \
-    useradd --system --create-home --gid gvm --shell /bin/bash gvm
+    useradd  --system --create-home --gid gvm --shell /bin/bash gvm
 
-# Config for **gvm** (not root), logs & state dirs
-RUN mkdir -p /home/gvm/.config /var/log/feedsync /opt/gvm/var/lib && \
-    chown -R gvm:gvm /home/gvm /var/log/feedsync /opt/gvm
+# Data dirs (PVCs can mount here later)
+RUN mkdir -p /var/lib/openvas/plugins /var/lib/notus /app && \
+    chown -R gvm:gvm /var/lib/openvas /var/lib/notus || true
 
-# Provide config to the user that will run the sync
-COPY greenbone-feed-sync.toml /home/gvm/.config/greenbone-feed-sync.toml
-RUN chown gvm:gvm /home/gvm/.config/greenbone-feed-sync.toml
+# You said TOML already exists, so we don't copy it.
+# If you ever bake it in, put it at /home/gvm/.config/greenbone-feed-sync.toml.
 
-# Cron job (cron.d format REQUIRES a user column)
-# Runs 01:00 every day as 'gvm'
-COPY feedsync-cron /etc/cron.d/feedsync-cron
-RUN chmod 0644 /etc/cron.d/feedsync-cron && \
-    crontab -r || true && \
-    touch /var/log/cron.log
-
-# Startup script starts cron in foreground so container stays alive
-COPY startup.sh /app/startup.sh
-RUN chmod +x /app/startup.sh
+# Runner + cron job (system cron.d file)
+COPY feedsync.sh /usr/local/bin/feedsync.sh
+COPY feedsync-cron /etc/cron.d/feedsync
+RUN chmod +x /usr/local/bin/feedsync.sh && \
+    chown root:root /etc/cron.d/feedsync && chmod 0644 /etc/cron.d/feedsync && \
+    # ensure trailing newline (cron is picky)
+    (tail -c1 /etc/cron.d/feedsync | od -An -t x1 | grep -q '0a' || echo >> /etc/cron.d/feedsync)
 
 WORKDIR /app
-ENTRYPOINT ["/app/startup.sh"]
+
+# One-shot run at boot (so you see logs immediately), then keep alive with cron -f
+CMD ["/bin/sh","-lc","/usr/local/bin/feedsync.sh || true; exec cron -f"]

@@ -4,7 +4,8 @@ metadata:
   name: gvmd-lite
   namespace: gvm
 spec:
-  selector: { app: gvmd-lite }
+  selector:
+    app: gvmd-lite
   ports:
     - name: http
       port: 8082

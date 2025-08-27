@@ -1,1 +1,5 @@
-0 1 * * * gvm /usr/local/bin/greenbone-feed-sync >> /var/log/feedsync/feedsync.log 2>&1
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+CRON_TZ=Europe/Berlin
+
+0 1 * * * root /usr/local/bin/feedsync.sh >> /proc/1/fd/1 2>&1

@@ -4,7 +4,8 @@ metadata:
   name: gsa-lite
   namespace: gvm
 spec:
-  selector: { app: gsa-lite }
+  selector:
+    app: gsa-lite
   ports:
     - name: http
       port: 80
