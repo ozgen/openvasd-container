@@ -2,43 +2,6 @@
 
 This repository includes Docker configurations to run Greenbone's OpenVASD scanner and feed synchronization as separate containers. It supports scanning on demand, shared feed volumes, and optional API key or mTLS security.
 
-## Folder Structure
-
-```
-
-.
-├── LICENSE
-├── README.md
-├── linux/                     # Setup for Linux environment
-│   ├── docker-compose.yml     # Docker Compose for feed and OpenVAS scanner services
-│   ├── feed/                  # Feed sync container setup
-│   │   ├── Dockerfile
-│   │   ├── feedsync-cron
-│   │   ├── greenbone-feed-sync.toml
-│   │   └── startup.sh
-│   └── openvasd/              # Scanner stack container setup
-│       ├── config.toml
-│       ├── docker-compose.yml
-│       ├── Dockerfile
-│       ├── openvas.conf
-│       └── startup.sh
-└── macos/                     # Setup for macOS environment
-    ├── docker-compose.yml     # Docker Compose for feed and OpenVAS scanner services
-    ├── feed/                  # Feed sync container setup
-    │   ├── Dockerfile
-    │   ├── feedsync-cron
-    │   ├── greenbone-feed-sync.toml
-    │   └── startup.sh
-    └── openvasd/              # Scanner stack container setup
-        ├── config.toml
-        ├── docker-compose.yml
-        ├── Dockerfile
-        ├── openvas.conf
-        └── startup.sh
-
-
-````
-
 ## Build and Run
 
 ### 1. Build Feed Sync Image
