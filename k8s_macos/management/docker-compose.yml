@@ -2,7 +2,7 @@ version: '3.1'
 
 services:
   feed-service:
-    image: feed-img:prod
+    image: ozgenm/feed-img:latest
     platform: linux/amd64
     container_name: feed-service
     restart: unless-stopped
@@ -17,7 +17,7 @@ services:
       retries: 10
 
   openvas-service:
-    image: scanner-img:v1
+    image: ozgenm/scanner:latest
     platform: linux/amd64
     container_name: openvas-service
     privileged: true
@@ -52,7 +52,7 @@ services:
       retries: 20
 
   gvmd-lite:
-    image: gvmd-lite:prod
+    image: ozgenm/gvmd-lite:latest
     platform: linux/amd64
     container_name: gvmd-lite
     depends_on:
@@ -66,6 +66,7 @@ services:
       DB_PORT: "5432"
       SERVER_PORT: "8082"
       LOG_LEVEL: "info"
+      SCANNER_HOST: "openvas-service"
     ports:
       - "8082:8082"
     healthcheck:
@@ -76,7 +77,7 @@ services:
     volumes:
     - gvm_plugins:/var/lib/openvas/plugins
   gsa-lite:
-    image: gsa-lite:prod
+    image: ozgenm/gsa-lite:latest
     container_name: gsa-lite
     depends_on:
       gvmd-lite:
