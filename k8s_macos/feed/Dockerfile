@@ -3,7 +3,7 @@ FROM debian:bookworm
 ENV DEBIAN_FRONTEND=noninteractive
 ENV FEEDSYNC_VERSION=25.1.0
 # Adjust if you prefer a different zone
-ENV TZ=Europe/Bratislava
+ENV TZ=Europe/Berlin
 
 # Install cron + deps and greenbone-feed-sync (Python package)
 RUN apt-get update && \
