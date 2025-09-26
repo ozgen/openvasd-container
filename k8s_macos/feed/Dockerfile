@@ -21,9 +21,6 @@ RUN groupadd --system gvm && \
 RUN mkdir -p /var/lib/openvas/plugins /var/lib/notus /app && \
     chown -R gvm:gvm /var/lib/openvas /var/lib/notus || true
 
-# You said TOML already exists, so we don't copy it.
-# If you ever bake it in, put it at /home/gvm/.config/greenbone-feed-sync.toml.
-
 # Runner + cron job (system cron.d file)
 COPY feedsync.sh /usr/local/bin/feedsync.sh
 COPY feedsync-cron /etc/cron.d/feedsync
