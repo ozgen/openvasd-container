@@ -37,6 +37,6 @@ run_as_user $CMD_NOTUS
 echo "[INFO] Feed sync completed successfully"
 touch /var/lib/openvas/plugins/.feedsync_ready
 
-# Keep container alive (only if you really want this behavior here)
+# Keep container alive
 echo "[INFO] Sleeping forever to keep container alive…"
 exec tail -f /dev/null
