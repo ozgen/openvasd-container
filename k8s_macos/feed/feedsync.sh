@@ -12,7 +12,7 @@ if id gvm >/dev/null 2>&1; then
 fi
 
 # If a TOML is mounted/baked for gvm, this is a sensible default path.
-# You can override at runtime with env GREENBONE_FEED_SYNC_CONFIG.
+# We can override at runtime with env GREENBONE_FEED_SYNC_CONFIG.
 export GREENBONE_FEED_SYNC_CONFIG="${GREENBONE_FEED_SYNC_CONFIG:-/home/gvm/.config/greenbone-feed-sync.toml}"
 
 # Run both feeds (no user switching; runs as root — avoids setuid issues)
