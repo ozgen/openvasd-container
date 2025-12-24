@@ -15,23 +15,23 @@ services:
       interval: 30s
       timeout: 5s
       retries: 10
-#
-#  openvas-service:
-#    image: ozgenm/scanner:latest
-#    container_name: openvas-service
-#    privileged: true
-#    cap_add:
-#      - NET_ADMIN    # Allows OpenVAS to perform network-related tasks.
-#      - NET_RAW      # Allows OpenVAS to use raw sockets, essential for scanning.
-##    network_mode: host
-#    depends_on:
-#      feed-service:
-#        condition: service_healthy
-#    ports:
-#      - "3001:3001"
-#    volumes:
-#      - gvm_plugins:/var/lib/openvas/plugins
-#      - gvm_notus:/var/lib/notus
+
+  openvas-service:
+    image: ozgenm/scanner:latest
+    container_name: openvas-service
+    privileged: true
+    cap_add:
+      - NET_ADMIN    # Allows OpenVAS to perform network-related tasks.
+      - NET_RAW      # Allows OpenVAS to use raw sockets, essential for scanning.
+#    network_mode: host
+    depends_on:
+      feed-service:
+        condition: service_healthy
+    ports:
+      - "3001:3001"
+    volumes:
+      - gvm_plugins:/var/lib/openvas/plugins
+      - gvm_notus:/var/lib/notus
 
 volumes:
   gvm_plugins:
