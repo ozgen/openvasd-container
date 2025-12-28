@@ -52,8 +52,14 @@ nanos = 0
 [listener]
 address = "0.0.0.0:3001"
 
-[log]
-level = "INFO"
+[logging]
+level = "DEBUG"
+
+[logging.additional]
+docker_registry = "INFO"
+container_scanning = 'INFO'
+sqlx = 'INFO'
+h2 = 'INFO'
 
 [storage]
 # can be either fs (file system), redis or inmemory (in memory).
