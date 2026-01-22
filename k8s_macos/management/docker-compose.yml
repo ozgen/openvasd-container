@@ -1,4 +1,3 @@
-version: '3.1'
 
 services:
   feed-service:
@@ -10,8 +9,9 @@ services:
       - gvm_plugins:/var/lib/openvas/plugins
       - gvm_notus:/var/lib/notus
       - gvm_log:/var/log/feedsync
+      - gvm_data:/var/lib/gvm
     healthcheck:
-      test: [ "CMD-SHELL", "test -f /var/lib/openvas/plugins/.feedsync_ready" ]
+      test: ["CMD-SHELL", "test -f /var/lib/openvas/plugins/.feedsync_ready"]
       interval: 30s
       timeout: 5s
       retries: 10
@@ -20,11 +20,11 @@ services:
     image: ozgenm/scanner:latest
     platform: linux/amd64
     container_name: openvas-service
+    restart: unless-stopped
     privileged: true
     cap_add:
-      - NET_ADMIN    # Allows OpenVAS to perform network-related tasks.
-      - NET_RAW      # Allows OpenVAS to use raw sockets, essential for scanning.
-#    network_mode: host
+      - NET_ADMIN
+      - NET_RAW
     depends_on:
       feed-service:
         condition: service_healthy
@@ -33,10 +33,12 @@ services:
     volumes:
       - gvm_plugins:/var/lib/openvas/plugins
       - gvm_notus:/var/lib/notus
+
   postgres:
     image: postgres:14
     platform: linux/amd64
     container_name: postgres
+    restart: unless-stopped
     environment:
       POSTGRES_USER: gvm
       POSTGRES_PASSWORD: gvm
@@ -44,50 +46,96 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "35432:5432"  # optional: expose to host
+      - "35432:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U gvm -d gvmd-lite-service" ]
+      test: ["CMD-SHELL", "pg_isready -U gvm -d gvmd-lite-service"]
       interval: 5s
       timeout: 3s
       retries: 20
+
+  gvmr-lite:
+    image: ozgenm/gvmr-lite:latest
+    platform: linux/amd64
+    container_name: gvmr-lite
+    restart: unless-stopped
+    user: "0:0"
+    depends_on:
+      feed-service:
+        condition: service_healthy
+    environment:
+      GVMR_PORT: "8084"
+      GVMR_REPORT_FORMATS_FEED_DIR: "/var/lib/gvm/data-objects/gvmd/report-formats"
+      GVMR_WORK_DIR: "/tmp/gvmr-lite/work"
+      GVMR_REBUILD_ON_START: "true"
+
+      # auth: none
+      GVMR_AUTH_MODE: "none"
+    ports:
+      - "8084:8084"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8084/health/ready >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    volumes:
+      - gvm_data:/var/lib/gvm:ro
 
   gvmd-lite:
     image: ozgenm/gvmd-lite:latest
     platform: linux/amd64
     container_name: gvmd-lite
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
+      gvmr-lite:
+        condition: service_healthy
+      # openvas-service:
+      #   condition: service_started
     environment:
+      # DB
       DB_USER: gvm
       DB_PASSWORD: gvm
       DB_NAME: gvmd-lite-service
       DB_HOST: postgres
       DB_PORT: "5432"
+
+      # app
       SERVER_PORT: "8082"
       LOG_LEVEL: "info"
+      EXPORT_DIR: "/tmp/gvmd-lite/exports"
+
+      # scanner
       SCANNER_HOST: "openvas-service"
+      SCANNER_PORT: "3001"
+
+      # gvmr integration
+      GVMR_ENABLED: "1"
+      GVMR_HOST: "gvmr-lite"
+      GVMR_PORT: "8084"
+      GVMR_AUTH_MODE: "none"
     ports:
       - "8082:8082"
     healthcheck:
-      test: [ "CMD-SHELL", "wget -q --spider http://localhost:8082/api/public/documentation/index.html || exit 1" ]
+      test: [ "CMD-SHELL", "wget -q --spider http://127.0.0.1:8082/api/public/documentation/index.html || exit 1" ]
       interval: 10s
       timeout: 3s
       retries: 30
     volumes:
-    - gvm_plugins:/var/lib/openvas/plugins
+      - gvm_plugins:/var/lib/openvas/plugins
+      - gvmd_exports:/tmp/gvmd-lite/exports
+
   gsa-lite:
     image: ozgenm/gsa-lite:latest
+    platform: linux/amd64
     container_name: gsa-lite
+    restart: unless-stopped
     depends_on:
       gvmd-lite:
         condition: service_healthy
     ports:
       - "8081:80"
-    # Keep runtime config minimal; we proxy /auth and /api in nginx,
-    # so leaving BACKEND_HOST empty makes the app use relative URLs.
     environment:
-#      BACKEND_HOST: "http://localhost:8080"
       AUTH_BASE_PATH: "/auth"
       API_BASE_PATH: "/api/v1"
 
@@ -95,4 +143,6 @@ volumes:
   gvm_plugins:
   gvm_notus:
   gvm_log:
+  gvm_data:
   pgdata:
+  gvmd_exports:
