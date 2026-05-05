@@ -85,6 +85,7 @@ services:
     platform: linux/amd64
     container_name: gvmd-lite
     restart: unless-stopped
+    user: "0:0"
     depends_on:
       postgres:
         condition: service_healthy
@@ -124,6 +125,7 @@ services:
     volumes:
       - gvm_plugins:/var/lib/openvas/plugins
       - gvmd_exports:/tmp/gvmd-lite/exports
+      - gvm_data:/var/lib/gvm:ro
 
   gsa-lite:
     image: ozgenm/gsa-lite:latest
