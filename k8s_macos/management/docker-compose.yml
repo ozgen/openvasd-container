@@ -54,7 +54,7 @@ services:
       retries: 20
 
   gvmr-lite:
-    image: ozgenm/gvmr-lite:latest
+    image: gvmr-lite-rs:latest
     platform: linux/amd64
     container_name: gvmr-lite
     restart: unless-stopped
@@ -67,6 +67,7 @@ services:
       GVMR_REPORT_FORMATS_FEED_DIR: "/var/lib/gvm/data-objects/gvmd/report-formats"
       GVMR_WORK_DIR: "/tmp/gvmr-lite/work"
       GVMR_REBUILD_ON_START: "true"
+      GVMR_EXPERIMENTAL_ENABLED: "true"
 
       # auth: none
       GVMR_AUTH_MODE: "none"

@@ -24,6 +24,7 @@ greenbone-feed-sync --type nasl
 greenbone-feed-sync --type notus
 greenbone-feed-sync --type report-format
 greenbone-feed-sync --type scan-config
+greenbone-feed-sync --type port-list
 
 # Readiness marker (useful for probes)
 touch /var/lib/openvas/plugins/.feedsync_ready || true
