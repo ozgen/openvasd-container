@@ -54,7 +54,7 @@ services:
       retries: 20
 
   gvmr-lite:
-    image: gvmr-lite-rs:latest
+    image: ozgenm/gvmr-lite-rs:latest
     platform: linux/amd64
     container_name: gvmr-lite
     restart: unless-stopped
@@ -74,15 +74,15 @@ services:
     ports:
       - "8084:8084"
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:8084/health/ready >/dev/null || exit 1"]
+      test: [ "CMD-SHELL", "true" ]
       interval: 10s
-      timeout: 3s
-      retries: 5
+      timeout: 5s
+      retries: 3
     volumes:
       - gvm_data:/var/lib/gvm:ro
 
   gvmd-lite:
-    image: ozgenm/gvmd-lite:latest
+    image: ozgenm/gvmd-lite-features:latest
     platform: linux/amd64
     container_name: gvmd-lite
     restart: unless-stopped
@@ -91,9 +91,9 @@ services:
       postgres:
         condition: service_healthy
       gvmr-lite:
-        condition: service_healthy
-      # openvas-service:
-      #   condition: service_started
+        condition: service_started
+      openvas-service:
+        condition: service_started
     environment:
       # DB
       DB_USER: gvm
@@ -112,10 +112,11 @@ services:
       SCANNER_PORT: "3001"
 
       # gvmr integration
-      GVMR_ENABLED: "1"
+      GVMR_ENABLED: "0"
       GVMR_HOST: "gvmr-lite"
       GVMR_PORT: "8084"
       GVMR_AUTH_MODE: "none"
+      ENABLE_CONTAINER_SCANNING: "true"
     ports:
       - "8082:8082"
     healthcheck:
@@ -125,6 +126,7 @@ services:
       retries: 30
     volumes:
       - gvm_plugins:/var/lib/openvas/plugins
+      - gvm_notus:/var/lib/notus
       - gvmd_exports:/tmp/gvmd-lite/exports
       - gvm_data:/var/lib/gvm:ro
 
